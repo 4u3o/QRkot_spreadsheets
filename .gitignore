@@ -1,2 +1,6 @@
 /.env
 /qrkot.db
+/test.db
+/venv/
+/app/core/practicum-qrkot-16877d9b6b62.json
+__pycache__/

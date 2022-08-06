@@ -1,6 +1,7 @@
-from typing import Optional
+from datetime import timedelta
+from typing import List, Optional, Tuple
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -39,6 +40,34 @@ class CRUDCharityProject(
         )
 
         return project_result.scalars().first()
+
+    async def get_projects_by_completion_rate(
+        self,
+        session: AsyncSession,
+    ) -> List[Tuple[CharityProject, timedelta]]:
+        stmt = select(
+            CharityProject,
+            # переводим close_date и create_date в секунды и считаем разницу
+            (
+                func.strftime('%s', CharityProject.close_date) -
+                func.strftime('%s', CharityProject.create_date)
+            ).label('completion')
+        ).where(
+            CharityProject.fully_invested
+        ).order_by(
+            'completion'
+        )
+
+        projects_result = await session.execute(
+            stmt
+        )
+
+        projects = [
+            (project, timedelta(seconds=seconds))
+            for project, seconds in projects_result
+        ]
+
+        return projects
 
     async def remove(
         self,
