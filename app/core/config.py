@@ -27,4 +27,20 @@ class Settings(BaseSettings):
         env_file = '.env'
 
 
+class Sheets:
+    UPDATE_RANGE: str = 'A1:E30'
+    TITLE: str = 'Лист1'
+    VERSION: str = 'v4'
+    LOCALE: str = 'ru_RU'
+    TYPE: str = 'GRID'
+    ID: int = 0
+    ROW_COUNT: int = 100
+    COLUMN_COUNT: int = 11
+    DT_FORMAT: str = "%Y/%m/%d %H:%M:%S"
+
+
+class Drive:
+    VERSION: str = 'v3'
+
+
 settings = Settings()

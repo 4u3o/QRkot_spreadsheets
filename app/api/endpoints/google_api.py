@@ -41,10 +41,10 @@ async def get_report(
     )
 
     if projects:
-        spreadsheetid = await spreadsheets_create(wrapper_services)
-        await set_user_permissions(spreadsheetid, wrapper_services)
+        spreadsheet_id = await spreadsheets_create(wrapper_services)
+        await set_user_permissions(spreadsheet_id, wrapper_services)
         await spreadsheets_update_value(
-            spreadsheetid,
+            spreadsheet_id,
             projects,
             wrapper_services
         )

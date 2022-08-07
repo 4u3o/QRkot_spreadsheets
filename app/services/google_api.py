@@ -3,33 +3,31 @@ from typing import List, Tuple
 
 from aiogoogle import Aiogoogle
 
-from app.core.config import settings
+from app.core.config import Drive, Sheets, settings
 from app.models import CharityProject
 
 
-FORMAT = "%Y/%m/%d %H:%M:%S"
-
-
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
-    now_date_time = datetime.now().strftime(FORMAT)
+    now_date_time = datetime.now().strftime(Sheets.DT_FORMAT)
     service = await wrapper_services.discover(
-        api_name='sheets', api_version='v4'
+        'sheets',
+        Sheets.VERSION
     )
 
     spreadsheet_body = {
         'properties': {
             'title': f'Отчет от {now_date_time}',
-            'locale': 'ru_RU'
+            'locale': Sheets.LOCALE
         },
         'sheets': [
             {
                 'properties': {
-                    'sheetType': 'GRID',
-                    'sheetId': 0,
-                    'title': 'Лист1',
+                    'sheetType': Sheets.TYPE,
+                    'sheetId': Sheets.ID,
+                    'title': Sheets.TITLE,
                     'gridProperties': {
-                        'rowCount': 100,
-                        'columnCount': 11
+                        'rowCount': Sheets.ROW_COUNT,
+                        'columnCount': Sheets.COLUMN_COUNT
                     }
                 }
             }
@@ -44,7 +42,7 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
 
 
 async def set_user_permissions(
-    spreadsheetid: str,
+    spreadsheet_id: str,
     wrapper_services: Aiogoogle
 ) -> None:
     permissions_body = {
@@ -53,24 +51,27 @@ async def set_user_permissions(
         'emailAddress': settings.email
     }
 
-    service = await wrapper_services.discover('drive', 'v3')
+    service = await wrapper_services.discover('drive', Drive.VERSION)
 
     await wrapper_services.as_service_account(
         service.permissions.create(
-            fileId=spreadsheetid,
+            fileId=spreadsheet_id,
             json=permissions_body,
-            fields="id"
+            fields='id'
         )
     )
 
 
 async def spreadsheets_update_value(
-    spreadsheetid: str,
+    spreadsheet_id: str,
     projects: List[Tuple[CharityProject, timedelta]],
     wrapper_services: Aiogoogle
 ) -> None:
-    now_date_time = datetime.now().strftime(FORMAT)
-    service = await wrapper_services.discover('sheets', 'v4')
+    now_date_time = datetime.now().strftime(Sheets.DT_FORMAT)
+    service = await wrapper_services.discover(
+        'sheets',
+        Sheets.VERSION
+    )
 
     table_values = [
         ['Отчет от', now_date_time],
@@ -92,8 +93,8 @@ async def spreadsheets_update_value(
 
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
-            spreadsheetId=spreadsheetid,
-            range='A1:E30',
+            spreadsheetId=spreadsheet_id,
+            range=Sheets.UPDATE_RANGE,
             valueInputOption='USER_ENTERED',
             json=update_body
         )
